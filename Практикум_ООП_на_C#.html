@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Практикум: ООП на C#</title>
+<style>
+  :root {
+    --bg: #f4f7f8;
+    --panel: #ffffff;
+    --text: #202832;
+    --text-dim: #5b6772;
+    --border: #dfe6ea;
+    --brand-dark: #0f3d5c;
+    --brand: #0f5c6e;
+    --brand-teal: #0f8a8a;
+    --brand-light: #eaf4fb;
+    --ok-bg: #eaf7ee;
+    --ok-border: #2f9e56;
+    --ok-text: #1f6e3b;
+    --warn-bg: #fff7e6;
+    --warn-border: #d1a13a;
+    --warn-text: #8a6516;
+    --err-bg: #fdeeea;
+    --err-border: #d9532c;
+    --err-text: #b8401d;
+    --code-bg: #1e2733;
+    --code-text: #d7e3ea;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10151a;
+      --panel: #171f26;
+      --text: #e7edf1;
+      --text-dim: #9fb0ba;
+      --border: #2a343c;
+      --brand-light: #17313f;
+      --code-bg: #0d1319;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10151a;
+    --panel: #171f26;
+    --text: #e7edf1;
+    --text-dim: #9fb0ba;
+    --border: #2a343c;
+    --brand-light: #17313f;
+    --code-bg: #0d1319;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "DejaVu Sans", sans-serif;
+    line-height: 1.55;
+    -webkit-user-select: none; user-select: none; /* блокируем выделение везде по умолчанию */
+  }
+  /* но в текстовых полях студент должен свободно печатать */
+  textarea, input { -webkit-user-select: text; user-select: text; }
+  p, li, .selectable { -webkit-user-select: text; user-select: text; } /* обычный текст пусть выделяется — это не код */
+
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: linear-gradient(180deg, var(--brand-dark), var(--brand));
+    color: #fff; padding: 14px 20px calc(14px + env(safe-area-inset-top, 0px)) 20px;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  }
+  .topbar .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .topbar h1 { font-size: 15px; margin: 0; font-weight: 700; letter-spacing: 0.2px; }
+  .topbar .sub { font-size: 11.5px; opacity: 0.8; margin-top: 2px; }
+  .progress-wrap { max-width: 720px; margin: 10px auto 0 auto; }
+  .progress-track { background: rgba(255,255,255,0.18); border-radius: 20px; height: 7px; overflow: hidden; }
+  .progress-fill { background: #7fe0d6; height: 100%; border-radius: 20px; transition: width .3s ease; }
+  .progress-label { font-size: 10.5px; opacity: 0.85; margin-top: 5px; display:flex; justify-content: space-between; }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 18px 16px 60px 16px; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 18px; margin-bottom: 16px;
+  }
+  .tag {
+    display:inline-block; background: var(--brand-light); color: var(--brand);
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 8px;
+  }
+  h2 { font-size: 19px; color: var(--brand-dark); margin: 0 0 10px 0; }
+  h3 { font-size: 14.5px; color: var(--brand-dark); margin: 16px 0 6px 0; }
+  p { margin: 0 0 10px 0; color: var(--text); }
+  ul, ol { margin: 0 0 10px 0; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  b { color: var(--brand-dark); }
+  :root[data-theme="dark"] b, @media (prefers-color-scheme: dark) { }
+  .btn-tag {
+    display:inline-block; background: var(--brand-light); border: 1px solid var(--border);
+    color: var(--brand); border-radius: 5px; padding: 1px 7px; font-size: 12.5px; font-weight: 700;
+  }
+  .kbd {
+    display:inline-block; background: #2a333d; color: #e8eef2; border-radius: 5px;
+    padding: 1px 7px; font-family: "SFMono-Regular", Menlo, monospace; font-size: 12px;
+  }
+
+  .callout { border-radius: 8px; padding: 10px 14px; margin: 12px 0; font-size: 13.5px; }
+  .callout .ct { font-weight: 700; display:block; margin-bottom: 3px; }
+  .callout.info { background: var(--brand-light); border-left: 4px solid var(--brand); }
+  .callout.info .ct { color: var(--brand); }
+  .callout.warn { background: var(--warn-bg); border-left: 4px solid var(--warn-border); }
+  .callout.warn .ct { color: var(--warn-text); }
+  .callout.ok { background: var(--ok-bg); border-left: 4px solid var(--ok-border); }
+  .callout.ok .ct { color: var(--ok-text); }
+
+  .step { display: flex; margin-bottom: 12px; gap: 10px; }
+  .step .num {
+    background: var(--brand-teal); color: #fff; min-width: 24px; height: 24px; border-radius: 50%;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size: 12px; flex-shrink:0;
+  }
+  .step .txt { padding-top: 2px; }
+
+  /* --- защищённый блок кода (не выделяется, копирование блокируется) --- */
+  .codebox-label {
+    display:inline-block; background: var(--brand-dark); color:#dff3f1; font-family: Menlo, monospace;
+    font-size: 11px; padding: 4px 10px; border-radius: 5px 5px 0 0; margin: 10px 0 -6px 0;
+  }
+  .codebox {
+    background: var(--code-bg); color: var(--code-text); font-family: "SFMono-Regular", Menlo, monospace;
+    font-size: 12px; border-radius: 8px; padding: 12px 14px; margin: 6px 0 4px 0;
+    white-space: pre; overflow-x: auto; line-height: 1.5;
+    -webkit-user-select: none !important; user-select: none !important;
+    position: relative;
+  }
+  .codebox::after {
+    content: "🔒 нельзя скопировать — впишите ниже сами";
+    display: block; font-size: 10px; opacity: 0.55; margin-top: 8px; user-select: none;
+  }
+
+  .challenge {
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin: 14px 0; background: var(--bg);
+  }
+  .challenge textarea {
+    width: 100%; min-height: 120px; font-family: "SFMono-Regular", Menlo, monospace; font-size: 12.5px;
+    border-radius: 8px; border: 1.5px solid var(--border); background: var(--panel); color: var(--text);
+    padding: 10px; resize: vertical; line-height: 1.5; tab-size: 4;
+  }
+  .challenge textarea:focus { outline: none; border-color: var(--brand-teal); }
+  .challenge .row2 { display:flex; gap:8px; align-items:center; margin-top: 8px; flex-wrap: wrap; }
+  .check-btn {
+    background: var(--brand); color:#fff; border:none; border-radius: 7px; padding: 8px 16px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .check-btn:hover { background: var(--brand-dark); }
+  .result-msg { font-size: 12.5px; font-weight: 600; }
+  .result-msg.ok { color: var(--ok-text); }
+  .result-msg.err { color: var(--err-text); }
+  .done-badge {
+    display:inline-block; background: var(--ok-bg); color: var(--ok-text); border: 1px solid var(--ok-border);
+    border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700; margin-left: 6px;
+  }
+  .why-box {
+    background: var(--brand-light); border-radius: 8px; padding: 9px 13px; margin: 0 0 4px 0;
+    font-size: 12.5px; color: var(--text);
+  }
+  .nav-row { display:flex; justify-content: space-between; align-items:center; margin-top: 10px; gap: 10px; }
+  .nav-btn {
+    background: var(--brand-teal); color:#fff; border:none; border-radius: 9px; padding: 12px 20px;
+    font-size: 14px; font-weight: 700; cursor: pointer; flex: 1;
+  }
+  .nav-btn:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+  .nav-btn.secondary { background: transparent; color: var(--brand); border: 1.5px solid var(--border); flex: 0 0 auto; }
+
+  .toc { display: grid; gap: 6px; margin: 14px 0; }
+  .toc-item {
+    display:flex; align-items:center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); cursor: pointer; background: var(--panel);
+  }
+  .toc-item.current { border-color: var(--brand-teal); background: var(--brand-light); }
+  .toc-item.locked { opacity: 0.5; cursor: not-allowed; }
+  .toc-num {
+    min-width: 22px; height: 22px; border-radius: 50%; background: var(--border); color: var(--text-dim);
+    display:flex; align-items:center; justify-content:center; font-size: 11px; font-weight: 700; flex-shrink:0;
+  }
+  .toc-item.current .toc-num { background: var(--brand-teal); color: #fff; }
+  .toc-item.complete .toc-num { background: var(--ok-border); color: #fff; }
+  .toc-title { font-size: 13px; }
+
+  footer.pagefoot { text-align:center; color: var(--text-dim); font-size: 11px; padding: 10px 0 30px 0; }
+
+  .reset-link { color: var(--text-dim); font-size: 11px; text-decoration: underline; cursor: pointer; background:none; border:none; padding: 0; }
+
+  /* --- вход по имени --- */
+  .gate { max-width: 420px; margin: 60px auto; padding: 0 16px; }
+  .gate .card { text-align: center; }
+  .gate input {
+    width: 100%; padding: 11px 13px; margin: 8px 0; border-radius: 8px;
+    border: 1.5px solid var(--border); background: var(--panel); color: var(--text); font-size: 14px;
+  }
+  .gate input:focus { outline: none; border-color: var(--brand-teal); }
+  .gate-btn {
+    width: 100%; background: var(--brand-teal); color:#fff; border:none; border-radius: 9px;
+    padding: 13px; font-size: 14.5px; font-weight: 700; cursor: pointer; margin-top: 8px;
+  }
+  .gate-btn:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+  .gate-err { color: var(--err-text); font-size: 12px; margin-top: 6px; min-height: 16px; }
+
+  /* --- отчёт для преподавателя --- */
+  .report-box {
+    background: var(--code-bg); color: var(--code-text); border-radius: 8px; padding: 12px 14px;
+    font-family: "SFMono-Regular", Menlo, monospace; font-size: 12px; white-space: pre-wrap;
+    -webkit-user-select: text; user-select: text; margin: 10px 0;
+  }
+  .copy-btn {
+    background: var(--brand-dark); color:#fff; border:none; border-radius: 8px; padding: 10px 18px;
+    font-size: 13.5px; font-weight: 700; cursor: pointer; margin-top: 8px;
+  }
+  .copy-btn.copied { background: var(--ok-border); }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(10,15,20,0.55); z-index: 50;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-card {
+    background: var(--panel); border-radius: 12px; padding: 20px; max-width: 460px; width: 100%;
+    max-height: 85vh; overflow-y: auto;
+  }
+  .modal-close {
+    float: right; background: none; border: none; font-size: 18px; color: var(--text-dim); cursor: pointer;
+  }
+
+  ::selection { background: transparent; }
+  textarea::selection, input::selection, p::selection, li::selection { background: #b7d9e8; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="row">
+    <div>
+      <h1>Практикум: ООП на C#</h1>
+      <div class="sub" id="subLabel">Классы, объекты, модификаторы доступа — пишите код сами</div>
+    </div>
+    <div style="text-align:right;">
+      <div id="studentLabel" style="font-size:11.5px; color:#dff3f1; margin-bottom:3px;"></div>
+      <button class="reset-link" onclick="toggleReportModal(true)" style="color:#dff3f1; margin-right:10px;">Отчёт о прогрессе</button>
+      <button class="reset-link" onclick="resetProgress()" style="color:#dff3f1;">Сбросить прогресс</button>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label"><span id="progressText">Часть 1 из 15</span><span id="progressPct">0%</span></div>
+  </div>
+</div>
+
+<div class="wrap" id="app"></div>
+
+<footer class="pagefoot">Код в тёмных блоках нельзя выделить и скопировать — его нужно перепечатать в поле ниже, чтобы двигаться дальше.</footer>
+
+<script>
+/* ============================ ДАННЫЕ ЧАСТЕЙ ============================ */
+const PARTS = [
+{
+  id: 0, tag: "Старт", title: "Что мы будем делать",
+  html: `
+    <p>Это практикум по трём темам курса «ООП на C#»: принципы ООП (абстракция, инкапсуляция,
+    полиморфизм), классы и объекты с их методами, и модификаторы доступа. Вы пройдёте путь от
+    простых примеров к одному большому классу <span class="kbd">Student</span>, который объединяет всё сразу.</p>
+    <div class="step"><div class="num">1</div><div class="txt">Понадобится любая среда для C#: Visual Studio, VS Code с расширением C#, или онлайн-компилятор (например dotnet fiddle).</div></div>
+    <div class="step"><div class="num">2</div><div class="txt">Создайте один раз консольный проект (Console App, C#) — весь код практикума пишите в файле <span class="kbd">Program.cs</span> этого проекта.</div></div>
+    <div class="step"><div class="num">3</div><div class="txt">Код в тёмных блоках нельзя скопировать — вы будете перепечатывать его сами в поле ниже, чтобы открыть следующую часть.</div></div>
+    <div class="callout info"><span class="ct">Зачем печатать руками</span>
+      Когда вы сами набираете код по буквам, мозг замечает структуру, отступы, фигурные скобки и
+      синтаксис — то, что при копипасте проскакивает мимо внимания. Это медленнее, но именно так
+      материал закрепляется.</div>
+  `,
+  challenges: []
+},
+{
+  id: 1, tag: "Часть 1", title: "Абстракция: интерфейс и его реализация",
+  html: `
+    <p>Абстракция — это когда пользователю класса виден только интерфейс («что делать»),
+    а детали реализации спрятаны. Перепечатайте интерфейс <span class="kbd">ITransport</span>,
+    а затем класс <span class="kbd">Автомобиль</span>, который его реализует.</p>
+  `,
+  challenges: [
+    {
+      filename: "ITransport.cs — интерфейс",
+      why: "Интерфейс описывает только «что делать» (Ускориться, Затормозить), но не «как» — это и есть абстракция: пользователю интерфейса не нужно знать про устройство двигателя.",
+      code: `public interface ITransport
+{
+    void Ускориться();
+    void Затормозить();
+}`,
+      note: "Две сигнатуры методов без тела, разделённые точкой с запятой."
+    },
+    {
+      filename: "Program.cs — класс Автомобиль",
+      why: "Класс Автомобиль реализует интерфейс: детали (переменная скорости, как именно меняется значение) скрыты внутри класса и не видны тому, кто просто вызывает Ускориться() или Затормозить().",
+      code: `public class Автомобиль : ITransport
+{
+    private int скоростьКмЧ = 0;
+
+    public void Ускориться()
+    {
+        скоростьКмЧ += 10;
+        Console.WriteLine($"Скорость: {скоростьКмЧ} км/ч");
+    }
+
+    public void Затормозить()
+    {
+        скоростьКмЧ = Math.Max(0, скоростьКмЧ - 10);
+    }
+}`,
+      note: "Двоеточие после имени класса означает «реализует интерфейс ITransport»."
+    }
+  ]
+},
+{
+  id: 2, tag: "Часть 2", title: "Инкапсуляция: банковский счёт",
+  html: `
+    <p>Инкапсуляция — данные объекта скрыты (private) и меняются только через его собственные методы,
+    которые могут проверить корректность операции. Перепечатайте класс <span class="kbd">БанковскийСчёт</span>.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — класс БанковскийСчёт",
+      why: "Поле баланс скрыто модификатором private — снаружи класса его нельзя поменять напрямую, только через методы ПополнитьСчёт и СнятьСредства, которые проверяют условия (например, что нельзя снять больше, чем есть на счёте).",
+      code: `public class БанковскийСчёт
+{
+    private decimal баланс;
+
+    public БанковскийСчёт(decimal начальныйБаланс)
+    {
+        баланс = начальныйБаланс;
+    }
+
+    public decimal ПолучитьБаланс() => баланс;
+
+    public void ПополнитьСчёт(decimal сумма)
+    {
+        if (сумма <= 0) return;
+        баланс += сумма;
+    }
+
+    public void СнятьСредства(decimal сумма)
+    {
+        if (сумма > баланс)
+        {
+            Console.WriteLine("Недостаточно средств.");
+            return;
+        }
+        баланс -= сумма;
+    }
+}`,
+      note: "Обратите внимание на конструктор — метод с именем класса и без типа возвращаемого значения."
+    }
+  ]
+},
+{
+  id: 3, tag: "Часть 3", title: "Полиморфизм: команда «Голос!»",
+  html: `
+    <p>Полиморфизм — один и тот же вызов метода ведёт себя по-разному у разных объектов.
+    Сначала перепечатайте иерархию классов животных, затем — код, который вызывает их всех одинаково.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — Животное, Собака, Кошка, Попугай",
+      why: "Метод ИздатьЗвук объявлен один раз как abstract в базовом классе Животное — общий интерфейс. Каждый наследник переопределяет его (override) по-своему: это и есть полиморфизм.",
+      code: `public abstract class Животное
+{
+    public string Кличка { get; set; }
+    protected Животное(string кличка) { Кличка = кличка; }
+
+    public abstract void ИздатьЗвук();
+}
+
+public class Собака : Животное
+{
+    public Собака(string кличка) : base(кличка) { }
+    public override void ИздатьЗвук()
+        => Console.WriteLine($"{Кличка} говорит: Гав-гав!");
+}
+
+public class Кошка : Животное
+{
+    public Кошка(string кличка) : base(кличка) { }
+    public override void ИздатьЗвук()
+        => Console.WriteLine($"{Кличка} говорит: Мяу!");
+}
+
+public class Попугай : Животное
+{
+    public Попугай(string кличка) : base(кличка) { }
+    public override void ИздатьЗвук()
+        => Console.WriteLine($"{Кличка} говорит: Попка дурак!");
+}`,
+      note: "base(кличка) в конструкторе — вызов конструктора родительского класса Животное."
+    },
+    {
+      filename: "Program.cs — вызов через общий список",
+      why: "Список хранит элементы типа Животное, но у каждого реально вызывается своя версия ИздатьЗвук — вызывающему коду не важно, кто именно в списке: собака, кошка или попугай.",
+      code: `List<Животное> животные = new List<Животное>
+{
+    new Собака("Барон"), new Кошка("Мурка"), new Попугай("Кеша")
+};
+
+foreach (var ж in животные)
+{
+    ж.ИздатьЗвук();
+}`,
+      note: "Один и тот же вызов ж.ИздатьЗвук() — три разных результата."
+    }
+  ]
+},
+{
+  id: 4, tag: "Часть 4", title: "Классы и объекты: из чего строим",
+  html: `
+    <p>Класс — это шаблон (чертёж), объект — конкретный экземпляр, созданный по этому шаблону
+    через ключевое слово <span class="kbd">new</span>. Перепечатайте демонстрационный класс и код,
+    который создаёт объект и вызывает его метод.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — класс DemoClass",
+      why: "Здесь показаны все три основных элемента класса: поле (хранит данные), свойство (удобный способ читать/менять поле) и метод (действие, которое умеет выполнять объект).",
+      code: `class DemoClass
+{
+    int field = 0;
+
+    public int Property { get; set; }
+
+    public void Method()
+    {
+        Console.WriteLine("Method");
+    }
+}`,
+      note: "Свойство Property объявлено в одну строку через { get; set; } — это автосвойство."
+    },
+    {
+      filename: "Program.cs — создание объекта",
+      why: "new DemoClass() создаёт конкретный объект по шаблону класса. Дальше через точку вызывается его метод — так же, как вы будете вызывать методы всех классов из этого практикума.",
+      code: `DemoClass demo = new DemoClass();
+demo.Method();`,
+      note: "Слева от = — тип переменной, справа — создание объекта этого типа."
+    }
+  ]
+},
+{
+  id: 5, tag: "Часть 5", title: "Конструкторы и инициализация объектов",
+  html: `
+    <p>Если у класса есть конструкторы с параметрами, при создании объекта можно сразу задать
+    значения полей, а публичным свойствам — присвоить значения прямо при инициализации.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — инициализация через конструктор",
+      why: "Конструктор — это специальный метод, который выполняется в момент создания объекта и позволяет сразу передать ему начальные данные, а не заполнять поля отдельными командами после.",
+      code: `DemoClass d2 = new DemoClass(1);
+d2.Method();
+
+var d3 = new DemoClass(1, 2);
+d3.Method();
+
+var d4 = new DemoClass();
+
+var d5 = new DemoClass(10) { Property = 11 };
+d5.Method();`,
+      note: "var — неявное объявление типа переменной, компилятор сам определяет тип по правой части."
+    }
+  ]
+},
+{
+  id: 6, tag: "Часть 6", title: "Статические методы и методы объекта",
+  html: `
+    <p>Статический метод принадлежит самому классу — его можно вызвать без создания объекта.
+    Метод объекта требует сначала создать экземпляр класса через <span class="kbd">new</span>.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — static и методы объекта",
+      why: "Console.WriteLine, которым вы уже пользовались много раз, — это статический метод: его можно вызвать через имя класса Console, не создавая объект. NoneStaticMethod наоборот — требует сначала new DemoClass().",
+      code: `class DemoClass
+{
+    public static void StaticMethod()
+    {
+        Console.WriteLine("Message from static method");
+    }
+
+    public void NoneStaticMethod()
+    {
+        Console.WriteLine("Message from none static method");
+    }
+}`,
+      note: "static стоит перед именем метода, до типа возвращаемого значения."
+    },
+    {
+      filename: "Program.cs — вызов обоих видов методов",
+      why: "Обратите внимание на разницу в вызове: DemoClass.StaticMethod() — через имя класса, а d8.NoneStaticMethod() — через переменную-объект.",
+      code: `DemoClass.StaticMethod();
+
+var d8 = new DemoClass();
+d8.NoneStaticMethod();`,
+      note: "Точка после DemoClass — обращение к статическому члену класса."
+    }
+  ]
+},
+{
+  id: 7, tag: "Часть 7", title: "Методы с аргументами и возвращаемым значением",
+  html: `
+    <p>Метод может принимать данные через аргументы в скобках и возвращать результат через
+    <span class="kbd">return</span>. Перепечатайте метод и его вызов.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — метод с параметром",
+      why: "int перед именем метода — это тип возвращаемого значения. value в скобках — параметр, через который снаружи передаётся число для умножения.",
+      code: `class DemoClass
+{
+    int field = 10;
+
+    public int MulField(int value)
+    {
+        return field * value;
+    }
+}`,
+      note: "return завершает метод и отдаёт значение туда, откуда метод был вызван."
+    },
+    {
+      filename: "Program.cs — вызов метода с результатом",
+      code: `var d8 = new DemoClass();
+Console.WriteLine($"MulField() result: {d8.MulField(2)}");`,
+      note: "Результат вызова d8.MulField(2) сразу подставляется в строку через интерполяцию $\"...\"."
+    }
+  ]
+},
+{
+  id: 8, tag: "Часть 8", title: "Поля и инкапсуляция через getter/setter",
+  html: `
+    <p>Работать с полями напрямую через public считается плохой практикой. Лучше открывать
+    доступ через специальные методы — getter и setter. Перепечатайте класс <span class="kbd">Building</span>.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — класс Building",
+      why: "Поле height ничем не помечено — значит, оно private по умолчанию и недоступно снаружи напрямую. Методы GetHeight и SetHeight — это и есть getter и setter, единственный разрешённый способ прочитать или изменить значение поля извне.",
+      code: `class Building
+{
+    float height;
+
+    public float GetHeight() => height;
+    public void SetHeight(float h) => height = h;
+}`,
+      note: "Символы => — это выражение-тело метода, короткая запись без фигурных скобок и return."
+    },
+    {
+      filename: "Program.cs — использование Building",
+      code: `var b1 = new Building();
+b1.SetHeight(12);
+Console.WriteLine($"Height of building: {b1.GetHeight()}");`,
+      note: "SetHeight меняет скрытое поле, GetHeight — читает его текущее значение."
+    }
+  ]
+},
+{
+  id: 9, tag: "Часть 9", title: "Модификаторы доступа: private по умолчанию",
+  html: `
+    <p>Если модификатор доступа не указан явно, член класса по умолчанию — <span class="kbd">private</span>:
+    доступен только внутри своего же класса. Перепечатайте класс и убедитесь в этом сами.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — класс Modifiers",
+      why: "Метод AAA() никак не помечен — значит, он private. Вызвать его можно только изнутри того же класса Modifiers, что и происходит внутри BBB().",
+      code: `class Modifiers
+{
+    static void AAA()
+    {
+        Console.WriteLine("Modifiers AAA");
+    }
+
+    public static void BBB()
+    {
+        Console.WriteLine("Modifiers BBB");
+        AAA();
+    }
+}`,
+      note: "AAA() вызывается внутри BBB() — оба метода принадлежат одному классу, поэтому это разрешено."
+    }
+  ],
+  after: `
+    <div class="callout warn"><span class="ct">Проверьте сами</span>
+    Если в Main написать <span class="kbd">Modifiers.AAA();</span> напрямую — компилятор откажется
+    собирать проект с ошибкой <span class="kbd">'Modifiers.AAA()' is inaccessible due to its protection level</span>.
+    А вот <span class="kbd">Modifiers.BBB();</span> сработает — попробуйте оба варианта в своей среде.</div>
+  `
+},
+{
+  id: 10, tag: "Часть 10", title: "Модификаторы доступа: protected и наследование",
+  html: `
+    <p><span class="kbd">protected</span> открывает член только своему классу и его наследникам —
+    для остального кода он так же недоступен, как private. Перепечатайте два класса ниже.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — ModifiersBase и ModifiersDerived",
+      why: "AAA() — private, недоступен даже наследнику. BBB() — public, доступен всем. CCC() — protected, доступен только классу ModifiersBase и его наследникам, например ModifiersDerived.",
+      code: `class ModifiersBase
+{
+    static void AAA()
+    {
+        Console.WriteLine("ModifiersBase AAA");
+    }
+
+    public static void BBB()
+    {
+        Console.WriteLine("ModifiersBase BBB");
+    }
+
+    protected static void CCC()
+    {
+        Console.WriteLine("ModifiersBase CCC");
+    }
+}
+
+class ModifiersDerived : ModifiersBase
+{
+    public static void XXX()
+    {
+        BBB();
+        CCC();
+    }
+}`,
+      note: "Внутри XXX() нельзя вызвать AAA() — компилятор выдаст ошибку, если раскомментировать такую строку."
+    }
+  ]
+},
+{
+  id: 11, tag: "Часть 11", title: "Модификаторы доступа: internal",
+  html: `
+    <p><span class="kbd">internal</span> — доступ только коду внутри той же сборки (проекта).
+    Это модификатор класса по умолчанию. Перепечатайте пример.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — internal class",
+      why: "internal перед class ClassA означает, что этот класс можно использовать только внутри своего же проекта. Если подключить его как библиотеку из другого проекта — компилятор откажет с ошибкой доступа.",
+      code: `namespace AccessModifiersLibrary
+{
+    internal class ClassA
+    {
+    }
+}`,
+      note: "internal — это ровно то же самое, что не писать никакого модификатора перед классом."
+    }
+  ]
+},
+{
+  id: 12, tag: "Часть 12", title: "Модификаторы доступа: protected internal",
+  html: `
+    <p><span class="kbd">protected internal</span> сочетает оба правила: доступ открыт и коду внутри
+    той же сборки, и дочерним классам за её пределами. Перепечатайте три класса ниже.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — ClassA, ClassB, ClassC",
+      why: "MethodClassA доступен и классу ClassB (он наследник ClassA), и классу ClassC (он в той же сборке) — оба случая разрешены модификатором protected internal.",
+      code: `public class ClassA
+{
+    protected internal void MethodClassA()
+    {
+    }
+}
+
+public class ClassB : ClassA
+{
+    protected internal void MethodClassB()
+    {
+        MethodClassA();
+    }
+}
+
+public class ClassC
+{
+    public void MethodClassC()
+    {
+        ClassA classA = new ClassA();
+        classA.MethodClassA();
+    }
+}`,
+      note: "ClassC не является наследником ClassA — доступ у него есть только потому, что оба класса в одной сборке."
+    }
+  ]
+},
+{
+  id: 13, tag: "Часть 13", title: "Сквозной пример: класс Student",
+  html: `
+    <p>Финальный большой пример, который собирает все темы практикума в одном классе: абстракция,
+    инкапсуляция, классы/объекты/методы и все разобранные модификаторы доступа.
+    Перепечатайте класс целиком, а затем — код его использования.</p>
+  `,
+  challenges: [
+    {
+      filename: "Program.cs — класс Student",
+      why: "private-поля — инкапсуляция. Публичный PrintInfo() — открытый интерфейс класса, абстракция. Приватный IsAdult() — внутренняя деталь, не видна снаружи. GetStatus() помечен protected — пригодится будущему наследнику. LogToConsole() — internal, служебный метод только для своего проекта.",
+      code: `public class Student
+{
+    private string name;
+    private int age;
+    private string group;
+
+    public Student(string name, int age, string group)
+    {
+        this.name = name;
+        this.age = age;
+        this.group = group;
+    }
+
+    public void PrintInfo()
+        => Console.WriteLine($"{name}, {age} лет, группа {group}");
+
+    private bool IsAdult() => age >= 18;
+
+    protected string GetStatus()
+        => IsAdult() ? "совершеннолетний" : "несовершеннолетний";
+
+    internal void LogToConsole()
+        => Console.WriteLine($"[LOG] Студент {name} обработан.");
+}`,
+      note: "this.name = name — this указывает на поле объекта, отличая его от одноимённого параметра конструктора."
+    },
+    {
+      filename: "Program.cs — использование Student",
+      code: `var s1 = new Student("Иванов Иван", 19, "ИС-21");
+var s2 = new Student("Петрова Анна", 17, "ИС-21");
+
+s1.PrintInfo();
+s2.PrintInfo();`,
+      note: "Два объекта одного класса с разными данными — это и есть суть «объект = экземпляр класса»."
+    }
+  ]
+},
+{
+  id: 14, tag: "Финал", title: "Итог",
+  html: `
+    <p>Вы перепечатали и разобрали: абстракцию через интерфейс, инкапсуляцию через private-поля
+    и методы доступа, полиморфизм через override, устройство классов и объектов, конструкторы,
+    статические и обычные методы, и все пять уровней модификаторов доступа — вплоть до одного
+    большого класса Student, который их все объединяет.</p>
+    <div class="callout ok"><span class="ct">Готово</span>Теперь эти темы можно закрепить: попробуйте
+    добавить в Student ещё один метод с новым модификатором доступа и объяснить свой выбор.</div>
+    <h3>Что можно докрутить самостоятельно</h3>
+    <ul>
+      <li>Добавить класс-наследник Отличник : Student и воспользоваться его защищённым GetStatus()</li>
+      <li>Добавить свойство вместо части getter/setter методов ({ get; set; })</li>
+      <li>Написать свой пример с использованием internal в отдельном проекте-библиотеке</li>
+    </ul>
+  `,
+  challenges: []
+}
+];
+
+/* ============================ СОСТОЯНИЕ ============================ */
+const STORAGE_KEY = "csharp-oop-lab-progress-v1";
+let state = { current: 0, solved: {}, student: null, autoSubmitted: false };
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch (e) { /* нет доступа к storage — работаем в памяти */ }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function resetProgress() {
+  if (!confirm("Сбросить весь прогресс? Имя и группу нужно будет ввести заново.")) return;
+  state = { current: 0, solved: {}, student: null, autoSubmitted: false };
+  saveState();
+  render();
+}
+
+/* ============================ ВХОД ПО ИМЕНИ ============================ */
+function renderGate(err) {
+  const app = document.getElementById("app");
+  document.getElementById("studentLabel").textContent = "";
+  app.innerHTML = `
+    <div class="gate">
+      <div class="card">
+        <h2 style="margin-top:0;">Прежде чем начать</h2>
+        <p>Введите имя и группу — они попадут в итоговый отчёт, который вы в конце пришлёте преподавателю.</p>
+        <input id="gateName" type="text" placeholder="Имя и фамилия" autocomplete="off">
+        <input id="gateGroup" type="text" placeholder="Группа" autocomplete="off">
+        <button class="gate-btn" onclick="submitGate()">Начать практикум</button>
+        <div class="gate-err">${err || ""}</div>
+      </div>
+    </div>
+  `;
+  document.getElementById("gateName").focus();
+}
+function submitGate() {
+  const name = document.getElementById("gateName").value.trim();
+  const group = document.getElementById("gateGroup").value.trim();
+  if (!name || !group) {
+    renderGate("Заполните оба поля, пожалуйста.");
+    return;
+  }
+  state.student = { name, group };
+  saveState();
+  render();
+}
+
+/* ============================ ОТПРАВКА В GOOGLE ФОРМУ ============================ */
+/* ЗАМЕНИТЕ на данные своей НОВОЙ Google-формы для практикума по C# —
+   action берётся из атрибута action тега <form>, entry.XXXXXX — из атрибутов name
+   у нужных полей, как описано в инструкции по созданию формы. */
+const GOOGLE_FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSdEFrWtvUU14mwJwOP8k4fjOyAmPihiZEXYTIpei30A7VmqkA/formResponse";
+const GOOGLE_FORM_ENTRIES = {
+  name: "entry.906412044",    // поле «Имя и фамилия»
+  group: "entry.2030083144",  // поле «Группа»
+  status: "entry.1820254398", // поле «Статус»
+  tasks: "entry.873301333"    // поле «Решено заданий»
+};
+const EXPECTED_HOST = "koroglu1990.github.io";
+function sourceIsTrusted() {
+  return location.hostname === EXPECTED_HOST;
+}
+function reportFields() {
+  const total = PARTS.length;
+  let solvedCount = 0, totalChallenges = 0;
+  PARTS.forEach(p => {
+    (p.challenges||[]).forEach((_, i) => { totalChallenges++; if (state.solved[`${p.id}:${i}`]) solvedCount++; });
+    (p.challenges2||[]).forEach((_, i) => { totalChallenges++; if (state.solved[`${p.id}:b${i}`]) solvedCount++; });
+  });
+  const finished = state.current === total - 1 && isPartComplete(PARTS[total-1]);
+  let status = finished ? "практикум пройден полностью" : `дошёл до части ${state.current + 1} из ${total}`;
+  if (!sourceIsTrusted()) {
+    status = `⚠ ИЗМЕНЁННАЯ КОПИЯ (открыто с ${location.hostname || "локального файла"}) — ` + status;
+  }
+  return { name: state.student.name, group: state.student.group, status, tasks: `${solvedCount} из ${totalChallenges}` };
+}
+function submitToGoogleForm() {
+  if (!state.student) return;
+  const fields = reportFields();
+  const iframeName = "gform-submit-frame";
+  let iframe = document.getElementById(iframeName);
+  if (!iframe) {
+    iframe = document.createElement("iframe");
+    iframe.name = iframeName;
+    iframe.id = iframeName;
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+  }
+  const form = document.createElement("form");
+  form.action = GOOGLE_FORM_ACTION;
+  form.method = "POST";
+  form.target = iframeName;
+  form.style.display = "none";
+  Object.keys(GOOGLE_FORM_ENTRIES).forEach(key => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = GOOGLE_FORM_ENTRIES[key];
+    input.value = fields[key];
+    form.appendChild(input);
+  });
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(() => form.remove(), 1500);
+}
+function sendReport(btnId) {
+  submitToGoogleForm();
+  const btn = document.getElementById(btnId);
+  if (btn) {
+    btn.textContent = "✓ Отправлено преподавателю";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "Отправить преподавателю"; btn.classList.remove("copied"); }, 3000);
+  }
+}
+
+/* ============================ ОТЧЁТ (ТЕКСТ, РЕЗЕРВНЫЙ СПОСОБ) ============================ */
+function buildReport() {
+  const f = reportFields();
+  const dt = new Date();
+  const dtStr = dt.toLocaleString("ru-RU");
+  return `Отчёт о выполнении практикума «ООП на C#»
+Студент: ${f.name}
+Группа: ${f.group}
+Дата: ${dtStr}
+Статус: ${f.status}
+Заданий с кодом решено: ${f.tasks}`;
+}
+function copyReport(btnId) {
+  const text = buildReport();
+  const btn = document.getElementById(btnId || "copyReportBtn");
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "✓ Скопировано";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "Скопировать отчёт"; btn.classList.remove("copied"); }, 2500);
+  }).catch(() => {
+    btn.textContent = "Не получилось — выделите текст выше вручную";
+  });
+}
+
+let reportModalOpen = false;
+function toggleReportModal(open) {
+  if (!state.student) return;
+  reportModalOpen = open;
+  renderReportModal();
+}
+function renderReportModal() {
+  let existing = document.getElementById("reportModal");
+  if (existing) existing.remove();
+  if (!reportModalOpen) return;
+  const div = document.createElement("div");
+  div.id = "reportModal";
+  div.className = "modal-overlay";
+  div.onclick = (e) => { if (e.target === div) toggleReportModal(false); };
+  div.innerHTML = `
+    <div class="modal-card">
+      <button class="modal-close" onclick="toggleReportModal(false)">✕</button>
+      <h3 style="margin-top:0;">Отчёт о прогрессе на сейчас</h3>
+      <p style="font-size:12.5px;">Можно отправить преподавателю в любой момент, даже если практикум ещё не пройден до конца.</p>
+      <div class="report-box selectable">${escapeHtml(buildReport())}</div>
+      <button class="copy-btn" id="sendReportBtnModal" onclick="sendReport('sendReportBtnModal')">Отправить преподавателю</button>
+      <button class="copy-btn" id="copyReportBtnModal" onclick="copyReport('copyReportBtnModal')" style="background:transparent;color:var(--brand);border:1.5px solid var(--border);">Скопировать текстом (запасной способ)</button>
+    </div>
+  `;
+  document.body.appendChild(div);
+}
+
+/* ============================ ПРОВЕРКА КОДА ============================ */
+function normalize(s) {
+  return s
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map(line => {
+      // сохраняем ведущие отступы как есть — в Python они значимы
+      const indentMatch = line.match(/^[ \t]*/);
+      const indent = indentMatch ? indentMatch[0] : "";
+      let body = line.slice(indent.length).replace(/[ \t]+$/g, ""); // тело строки без хвостовых пробелов
+      // остальные пробелы внутри строки не принципиальны для Python — не будем к ним придираться
+      body = body
+        .replace(/[ \t]+/g, " ")      // несколько пробелов/табов подряд -> один
+        .replace(/\s*\(\s*/g, "(")    // пробелы вокруг ( убираем
+        .replace(/\s*\)\s*/g, ")")    // пробелы вокруг ) убираем
+        .replace(/\s*,\s*/g, ", ")    // пробел после запятой — ровно один, перед — ноль
+        .replace(/\s*:\s*$/g, ":")    // пробел перед двоеточием в конце строки убираем
+        .replace(/\s*=\s*/g, "=");    // пробелы вокруг = убираем (кроме ==, но их это тоже не портит)
+      return indent + body;
+    })
+    .join("\n")
+    .replace(/^\n+|\n+$/g, ""); // пустые строки в начале/конце
+}
+function getChallenge(partId, idx) {
+  const part = PARTS.find(p => p.id === partId);
+  if (typeof idx === "string" && idx.startsWith("b")) {
+    return part.challenges2[parseInt(idx.slice(1), 10)];
+  }
+  return part.challenges[idx];
+}
+function checkChallenge(partId, idx) {
+  const ta = document.getElementById(`ta-${partId}-${idx}`);
+  const msg = document.getElementById(`msg-${partId}-${idx}`);
+  const ch = getChallenge(partId, idx);
+  let typedRaw = ta.value;
+  if (ch.displayCode) {
+    // в показанном коде есть учебные #-комментарии — если студент случайно переписал и их,
+    // не наказываем за это: убираем строки, которые целиком являются комментарием
+    typedRaw = typedRaw.split("\n").filter(line => !/^\s*#/.test(line)).join("\n");
+  }
+  const typed = normalize(typedRaw);
+  const target = normalize(ch.code);
+  if (typed === target) {
+    state.solved[`${partId}:${idx}`] = true;
+    saveState();
+    msg.className = "result-msg ok";
+    msg.textContent = "✓ Совпадает! Можно двигаться дальше.";
+    render();
+  } else {
+    const typedLines = typed.split("\n");
+    const targetLines = target.split("\n");
+    let diffLine = -1;
+    for (let i = 0; i < Math.max(typedLines.length, targetLines.length); i++) {
+      if (typedLines[i] !== targetLines[i]) { diffLine = i + 1; break; }
+    }
+    msg.className = "result-msg err";
+    msg.textContent = diffLine > 0
+      ? `✗ Пока не совпадает. Проверьте строку ${diffLine} — сравните с образцом выше.`
+      : "✗ Пока не совпадает. Сравните внимательно с образцом выше.";
+  }
+}
+
+function isPartComplete(part) {
+  const chals = (part.challenges || []).length;
+  const chals2 = (part.challenges2 || []).length;
+  for (let i = 0; i < chals; i++) if (!state.solved[`${part.id}:${i}`]) return false;
+  for (let i = 0; i < chals2; i++) if (!state.solved[`${part.id}:b${i}`]) return false;
+  return true;
+}
+
+/* ============================ РЕНДЕР ============================ */
+function renderChallenge(part, ch, idx, keySuffix) {
+  const key = keySuffix !== undefined ? `${part.id}:b${idx}` : `${part.id}:${idx}`;
+  const taId = keySuffix !== undefined ? `ta-${part.id}-b${idx}` : `ta-${part.id}-${idx}`;
+  const msgId = keySuffix !== undefined ? `msg-${part.id}-b${idx}` : `msg-${part.id}-${idx}`;
+  const solved = !!state.solved[key];
+  const shownCode = ch.displayCode || ch.code;
+  return `
+    <div class="challenge">
+      ${ch.why ? `<p class="why-box">🎯 ${escapeHtml(ch.why)}</p>` : ""}
+      <span class="codebox-label">${escapeHtml(ch.filename)}</span>
+      <div class="codebox" oncopy="return false" oncontextmenu="return false" onselectstart="return false" ondragstart="return false">${escapeHtml(shownCode)}</div>
+      ${ch.note ? `<p style="font-size:12px;color:var(--text-dim);margin-top:6px;">💡 ${escapeHtml(ch.note)}</p>` : ""}
+      ${ch.displayCode ? `<p style="font-size:12px;color:var(--warn-text);margin-top:4px;">⚠ Строки с # выше — это пояснения, не переписывайте их. Внизу нужен только сам код, без комментариев.</p>` : ""}
+      <textarea id="${taId}" placeholder="Впишите код сюда вручную (без комментариев — как в чистом файле)..." onpaste="return false" ondrop="return false" oncontextmenu="return false" ${solved ? "readonly" : ""}>${solved ? escapeHtml(ch.code) : ""}</textarea>
+      <div class="row2">
+        ${solved
+          ? `<span class="done-badge">✓ Сделано</span>`
+          : `<button class="check-btn" onclick="checkChallenge(${part.id}, ${keySuffix !== undefined ? `'b${idx}'` : idx})">Проверить</button>
+             <span class="result-msg" id="${msgId}"></span>`
+        }
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function render() {
+  if (!state.student) { renderGate(); return; }
+  document.getElementById("studentLabel").textContent = `${state.student.name} · ${state.student.group}`;
+  const part = PARTS[state.current];
+  const app = document.getElementById("app");
+  const total = PARTS.length;
+  const complete = isPartComplete(part);
+
+  let challengesHtml = "";
+  if (part.challenges && part.challenges.length) {
+    challengesHtml += part.challenges.map((ch, i) => renderChallenge(part, ch, i)).join("");
+  }
+  let afterHtml = part.after || "";
+  let challenges2Html = "";
+  if (part.challenges2 && part.challenges2.length) {
+    challenges2Html += part.challenges2.map((ch, i) => renderChallenge(part, ch, i, "b")).join("");
+  }
+  let after2Html = part.after2 || "";
+
+  const reportHtml = (part.id === 14) ? `
+    <h3>Отчёт для преподавателя</h3>
+    <p>Пришлите этот текст преподавателю (в чат, почту или куда он попросил) — это подтверждение, что практикум пройден.</p>
+    <div class="report-box selectable">${escapeHtml(buildReport())}</div>
+    <button class="copy-btn" id="sendReportBtn" onclick="sendReport('sendReportBtn')">Отправить преподавателю</button>
+    <button class="copy-btn" id="copyReportBtn" onclick="copyReport()" style="background:transparent;color:var(--brand);border:1.5px solid var(--border);">Скопировать текстом (запасной способ)</button>
+    <p style="font-size:11px;color:var(--text-dim);margin-top:8px;">Отчёт уже отправлен автоматически при переходе на эту страницу. Кнопка нужна, если хотите отправить ещё раз или что-то пошло не так.</p>
+  ` : "";
+
+  app.innerHTML = `
+    <div class="card">
+      <span class="tag">${escapeHtml(part.tag)}</span>
+      <h2>${escapeHtml(part.title)}</h2>
+      ${part.html}
+      ${challengesHtml}
+      ${afterHtml}
+      ${challenges2Html}
+      ${after2Html}
+      ${reportHtml}
+      <div class="nav-row">
+        <button class="nav-btn secondary" onclick="goPrev()" ${state.current === 0 ? "disabled" : ""}>← Назад</button>
+        <button class="nav-btn" onclick="goNext()" ${(!complete || state.current === total - 1) ? "disabled" : ""}>
+          ${state.current === total - 1 ? "Это финал" : (complete ? "Далее →" : "Впишите код выше, чтобы продолжить")}
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">Содержание</h3>
+      <div class="toc">
+        ${PARTS.map((p, i) => {
+          const reachable = i <= state.current || isPartComplete(PARTS[i-1] || {challenges:[]});
+          const done = isPartComplete(p) && i < state.current;
+          const cls = i === state.current ? "current" : (done ? "complete" : (i > state.current && !allPriorComplete(i) ? "locked" : ""));
+          return `<div class="toc-item ${cls}" onclick="${(i <= state.current || allPriorComplete(i)) ? `goTo(${i})` : ''}">
+            <span class="toc-num">${done ? "✓" : i + 1}</span>
+            <span class="toc-title">${escapeHtml(p.title)}</span>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>
+  `;
+
+  document.getElementById("progressFill").style.width = `${Math.round((state.current / (total - 1)) * 100)}%`;
+  document.getElementById("progressText").textContent = `Часть ${state.current + 1} из ${total}`;
+  document.getElementById("progressPct").textContent = `${Math.round((state.current / (total - 1)) * 100)}%`;
+  window.scrollTo({top:0, behavior:"instant"});
+}
+
+function allPriorComplete(i) {
+  for (let k = 0; k < i; k++) if (!isPartComplete(PARTS[k])) return false;
+  return true;
+}
+function goNext() {
+  if (!isPartComplete(PARTS[state.current])) return;
+  if (state.current < PARTS.length - 1) {
+    state.current++;
+    if (state.current === PARTS.length - 1 && !state.autoSubmitted) {
+      submitToGoogleForm();
+      state.autoSubmitted = true;
+    }
+    saveState();
+    render();
+  }
+}
+function goPrev() {
+  if (state.current > 0) { state.current--; saveState(); render(); }
+}
+function goTo(i) {
+  if (i <= state.current || allPriorComplete(i)) { state.current = i; saveState(); render(); }
+}
+
+/* ============================ ЗАЩИТА ОТ КОПИРОВАНИЯ ============================ */
+document.addEventListener("copy", function(e) {
+  const sel = window.getSelection().toString();
+  const active = document.activeElement;
+  if (active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT")) return; // в полях ввода копировать можно
+  e.preventDefault();
+});
+document.addEventListener("contextmenu", function(e) {
+  const active = document.activeElement;
+  if (active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT")) return;
+  e.preventDefault();
+});
+document.addEventListener("keydown", function(e) {
+  const active = document.activeElement;
+  const inField = active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT");
+  const key = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && (key === "c" || key === "u") && !inField) {
+    e.preventDefault();
+  }
+  if ((e.ctrlKey || e.metaKey) && key === "s") { e.preventDefault(); }
+});
+
+/* ============================ СТАРТ ============================ */
+loadState();
+if (state.current >= PARTS.length) state.current = 0;
+render();
+</script>
+</body>
+</html>
